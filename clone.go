@@ -1,14 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/Shopify/sarama"
 	"log"
 )
 
 func CloneTopic(admin sarama.ClusterAdmin, sourceTopicName string, destinationTopicName string) error {
-	err := errors.New("sarama admin error")
 	settings := getTopicSettings(admin, sourceTopicName)
 
 	configEntries := map[string]*string{}
@@ -25,7 +23,7 @@ func CloneTopic(admin sarama.ClusterAdmin, sourceTopicName string, destinationTo
 		ReplicationFactor: 1,
 		ConfigEntries:     configEntries,
 	}
-	err = admin.CreateTopic(destinationTopicName, details, false)
+	err := admin.CreateTopic(destinationTopicName, details, false)
 	if err != nil {
 		log.Fatalf("create topic error: %v", err)
 		return err
@@ -36,8 +34,7 @@ func CloneTopic(admin sarama.ClusterAdmin, sourceTopicName string, destinationTo
 
 func getClusterTopicNames(admin sarama.ClusterAdmin) ([]string, error){
 	topics := map[string]sarama.TopicDetail{}
-	err := errors.New("list topics error")
-	topics, err = admin.ListTopics()
+	topics, err := admin.ListTopics()
 	if err != nil {
 		log.Fatalf("List topics error: %v", err)
 	}
@@ -54,8 +51,7 @@ func getTopicSettings(admin sarama.ClusterAdmin, topicName string) []sarama.Conf
 		Type:        sarama.TopicResource,
 		Name:        topicName,
 	}
-	err := errors.New("sarama admin error")
-	entry, err = admin.DescribeConfig(topicResource)
+	entry, err := admin.DescribeConfig(topicResource)
 	if err != nil {
 		fmt.Printf("Describe topic Config error: %v",err)
 	}
@@ -65,14 +61,13 @@ func getTopicSettings(admin sarama.ClusterAdmin, topicName string) []sarama.Conf
 
 // TODO: confirm this works
 func cloneTopicPartitions(admin sarama.ClusterAdmin, topic string) error {
-	err := errors.New("create partition error")
 	_, partitionMetadata := getTopicDetails(topic, admin)
 	var assignment [][]int32
 	for _, v := range partitionMetadata{
 		assignment = append(assignment, []int32{v.ID}, v.Isr, v.Replicas, v.OfflineReplicas)
 	}
 	numOfPartitions := int32(len(partitionMetadata))
-	err = admin.CreatePartitions(topic, numOfPartitions, assignment, false)
+	err := admin.CreatePartitions(topic, numOfPartitions, assignment, false)
 	if err != nil{
 		return err
 	}

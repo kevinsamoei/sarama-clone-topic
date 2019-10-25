@@ -32,10 +32,10 @@ services:
         CONFLUENT_METRICS_ENABLE: 'true'
         CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
-  topics:
+  clone:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-tests
     depends_on:
       - broker
 
